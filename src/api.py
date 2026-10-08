@@ -65,10 +65,10 @@ evidence_selector = EvidenceSelector(
 generator = AnswerGenerator()
 
 
-FAQ_PATH = Path("data/raw/FAQ.pdf")
+CORPUS_PATH = Path("data/raw")
 
-if FAQ_PATH.exists():
-    pipeline.index_document(str(FAQ_PATH))
+if CORPUS_PATH.exists():
+    pipeline.index_corpus(str(CORPUS_PATH))
 
 
 @app.get("/health")
