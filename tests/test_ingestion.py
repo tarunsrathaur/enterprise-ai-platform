@@ -59,3 +59,15 @@ def test_load_pdf_preserves_page_numbers():
     assert page_numbers == list(range(1, len(document.pages) + 1))
 
     assert all(page.content.strip() for page in document.pages)
+
+def test_document_contains_metadata():
+    loader = DocumentLoader()
+
+    document = loader.load("data/raw/sample-policy.txt")
+
+    assert document.file_name == "sample-policy.txt"
+    assert document.file_type == ".txt"
+    assert document.content_hash
+    assert len(document.content_hash) == 64
+    assert document.ingestion_timestamp
+    assert document.page_count == 1

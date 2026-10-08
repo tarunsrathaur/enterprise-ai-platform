@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
 
 
 @dataclass
@@ -19,21 +21,25 @@ class Chunk:
     page_number: int
     chunk_index: int
     text: str
-    
+
 @dataclass
 class Document:
     """Represents a source document loaded into the ingestion pipeline."""
-
     document_id: str
     source: str
+    file_name: str
     file_type: str
+    content_hash: str
+    ingestion_timestamp: str
     pages: list[Page]
 
     @property
     def content(self) -> str:
-        """Return all page content as a single string."""
         return "\n".join(page.content for page in self.pages)
 
+    @property
+    def page_count(self) -> int:
+        return len(self.pages)
 
 class DocumentLoader:
     """Loads supported documents from the local filesystem."""
@@ -62,7 +68,10 @@ class DocumentLoader:
         return Document(
             document_id=path.stem,
             source=str(path),
+            file_name=path.name,
             file_type=extension,
+            content_hash=self._calculate_hash(path),
+            ingestion_timestamp=datetime.now(timezone.utc).isoformat(),
             pages=pages,
         )
 
@@ -91,3 +100,6 @@ class DocumentLoader:
                 )
 
         return pages
+    
+    def _calculate_hash(self, path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()

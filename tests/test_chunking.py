@@ -4,9 +4,12 @@ from src.ingestion import Document, Page
 
 def create_test_document() -> Document:
     return Document(
-        document_id="test-document",
-        source="data/raw/test.txt",
-        file_type=".txt",
+    document_id="test-document",
+    source="data/raw/test.txt",
+    file_name="test.txt",
+    file_type=".txt",
+    content_hash="a" * 64,
+    ingestion_timestamp="2026-10-08T00:00:00+00:00",
         pages=[
             Page(
                 page_number=1,
@@ -74,9 +77,12 @@ def test_large_paragraph_is_split():
     large_paragraph = "A" * 250
 
     document = Document(
-        document_id="large-document",
-        source="data/raw/large.txt",
-        file_type=".txt",
+    document_id="large-document",
+    source="data/raw/large.txt",
+    file_name="large.txt",
+    file_type=".txt",
+    content_hash="b" * 64,
+    ingestion_timestamp="2026-10-08T00:00:00+00:00",
         pages=[
             Page(
                 page_number=1,
