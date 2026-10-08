@@ -45,6 +45,55 @@ class RetrievalPipeline:
             database_path=manifest_database
         )
 
+    def validate_persistent_state(self) -> bool:
+        """Validate that the persisted vector state is usable."""
+
+        index_path = Path(self.index_directory)
+
+        index_exists = (
+            (index_path / "index.faiss").exists()
+            and (index_path / "metadata.pkl").exists()
+        )
+
+        if not index_exists:
+            return False
+
+        if self.vector_store.is_empty:
+            return False
+
+        return True
+
+    def index_corpus(
+        self,
+        directory: str,
+    ) -> int:
+        """Index all supported documents in a directory."""
+
+        directory_path = Path(directory)
+
+        if not directory_path.exists():
+            raise FileNotFoundError(
+                f"Document directory not found: {directory_path}"
+            )
+
+        total_chunks = 0
+
+        for file_path in sorted(directory_path.iterdir()):
+            if not file_path.is_file():
+                continue
+
+            if file_path.suffix.lower() not in (
+                ".txt",
+                ".pdf",
+            ):
+                continue
+
+            total_chunks += self.index_document(
+                str(file_path)
+            )
+
+        return total_chunks
+
     def index_document(self, file_path: str) -> int:
         """Load, chunk and index a new or changed document."""
 
