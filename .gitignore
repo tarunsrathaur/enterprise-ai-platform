@@ -12,3 +12,13 @@ data/processed/
 *.log
 # Local coursework corpus
 data/coursework/
+
+# Private coursework corpus and generated reports
+data/coursework/
+data/evaluation/coursework_inventory.csv
+data/evaluation/coursework_inventory_summary.json
+data/evaluation/coursework_manifest.json
+data/evaluation/coursework_ocr_report.csv
+data/evaluation/coursework_selection_proposal.csv
+data/evaluation/coursework_selection_summary.json
+data/processed/coursework_ocr/
