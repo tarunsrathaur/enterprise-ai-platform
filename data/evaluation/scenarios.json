@@ -1,0 +1,34 @@
+
+{
+  "dataset_version": "0.1.0",
+  "description": "Ground-truth scenarios for controlled enterprise RAG evaluation.",
+  "scenarios": [
+    {
+      "scenario_id": "DIRECT-001",
+      "category": "direct_retrieval",
+      "question": "Which platform must employees not use to communicate academic queries?",
+      "answerable": true,
+      "expected_answer": "MS Teams is not an approved platform for academic queries or course-related communication.",
+      "source_document_ids": ["FAQ"],
+      "expected_pages": [5]
+    },
+    {
+      "scenario_id": "DIRECT-002",
+      "category": "direct_retrieval",
+      "question": "Where can students seek clarification about academic queries?",
+      "answerable": true,
+      "expected_answer": "Students can use the discussion forum, email the LF, or ask during a live class.",
+      "source_document_ids": ["FAQ"],
+      "expected_pages": [4]
+    },
+    {
+      "scenario_id": "UNANSWERABLE-001",
+      "category": "unanswerable",
+      "question": "What is the exact monetary penalty for using an unapproved academic communication platform?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document_ids": [],
+      "expected_pages": []
+    }
+  ]
+}
