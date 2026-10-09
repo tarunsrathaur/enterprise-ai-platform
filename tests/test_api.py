@@ -33,7 +33,7 @@ def test_ask_returns_grounded_answer():
     assert "sources" in data
 
     assert "MS Teams" in data["answer"]
-    assert "[Page 5]" in data["answer"]
+    assert "[FAQ.pdf, Page 5]" in data["answer"]
 
     assert len(data["sources"]) >= 1
     assert data["sources"][0]["page"] == 5

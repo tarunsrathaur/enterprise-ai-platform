@@ -96,21 +96,26 @@ ANSWER:
 
         answer = response["message"]["content"].strip()
 
-        source_pages = sorted(
-            {
-                result.chunk.page_number
-                for result in results
-            }
-        )
 
-        citations = " ".join(
-            f"[Page {page}]"
-            for page in source_pages
-        )
+        citations = []
+
+        seen_sources = set()
+
+        for result in results:
+            source_name = result.chunk.source.replace("\\", "/").rsplit("/", 1)[-1]
+            page_number = result.chunk.page_number
+            citation = (source_name, page_number)
+
+            if citation not in seen_sources:
+                seen_sources.add(citation)
+                citations.append(
+                    f"[{source_name}, Page {page_number}]"
+                )
 
         answer_with_citations = (
-            f"{answer} {citations}"
+            f"{answer} {' '.join(citations)}"
         ).strip()
+
 
         return GeneratedAnswer(
             answer=answer_with_citations,

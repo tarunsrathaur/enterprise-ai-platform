@@ -59,7 +59,38 @@ def test_generated_answer_preserves_source_pages(monkeypatch):
         ],
     )
 
-    assert "[Page 4]" in result.answer
-    assert "[Page 5]" in result.answer
+    assert "[test.pdf, Page 4]" in result.answer
+    assert "[test.pdf, Page 5]" in result.answer
 
     assert len(result.sources) == 2
+
+
+def test_citations_identify_source_document_and_page(monkeypatch):
+    class FakeResponse:
+        def __getitem__(self, key):
+            if key == "message":
+                return {
+                    "content": "Gradient descent updates model parameters."
+                }
+            raise KeyError(key)
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: FakeResponse(),
+    )
+
+    generator = AnswerGenerator()
+
+    first = make_result(3)
+    first.chunk.source = "data/coursework/ML Study Guide.pdf"
+
+    second = make_result(3)
+    second.chunk.source = "data/coursework/ML Cheat Sheet.pdf"
+
+    result = generator.generate(
+        query="How are model parameters updated?",
+        results=[first, second],
+    )
+
+    assert "[ML Study Guide.pdf, Page 3]" in result.answer
+    assert "[ML Cheat Sheet.pdf, Page 3]" in result.answer
