@@ -37,6 +37,7 @@ def test_ask_returns_grounded_answer():
 
     assert len(data["sources"]) >= 1
     assert data["sources"][0]["page"] == 5
+    assert data["sources"][0]["source"] == "FAQ.pdf"
 
 
 def test_ask_abstains_when_information_is_missing():

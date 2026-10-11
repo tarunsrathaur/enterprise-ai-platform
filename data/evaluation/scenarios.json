@@ -21,6 +21,61 @@
       "source_document_ids": ["FAQ"],
       "expected_pages": [4]
     },
+
+    {
+    "scenario_id": "DIRECT-003",
+    "category": "direct_retrieval",
+    "question": "Where are lecture slides uploaded, and how far in advance?",
+    "answerable": true,
+    "expected_answer": "Lecture slides are uploaded to the course page on the LMS at least five days before the scheduled lecture.",
+    "source_document_ids": ["FAQ"],
+    "expected_pages": [1]
+    },
+    {
+    "scenario_id": "DIRECT-004",
+    "category": "direct_retrieval",
+    "question": "How many quizzes and assignments are conducted during the semester?",
+    "answerable": true,
+    "expected_answer": "The course includes two quizzes and two assignments.",
+    "source_document_ids": ["FAQ"],
+    "expected_pages": [2]
+    },
+    {
+    "scenario_id": "DIRECT-005",
+    "category": "direct_retrieval",
+    "question": "Which programming language is preferred for experiential learning?",
+    "answerable": true,
+    "expected_answer": "Python is the preferred programming language for experiential learning components.",
+    "source_document_ids": ["FAQ"],
+    "expected_pages": [5]
+    },
+    {
+    "scenario_id": "DIRECT-006",
+    "category": "direct_retrieval",
+    "question": "What does the enterprise AI policy say about entering confidential customer information into public AI services?",
+    "answerable": true,
+    "expected_answer": "Confidential customer information must not be entered into public AI services.",
+    "source_document_ids": ["sample-policy"],
+    "expected_pages": [1]
+    },
+    {
+    "scenario_id": "DIRECT-007",
+    "category": "direct_retrieval",
+    "question": "Who must review AI-generated outputs used in customer-facing processes?",
+    "answerable": true,
+    "expected_answer": "An authorized employee must review all AI-generated outputs used in customer-facing processes.",
+    "source_document_ids": ["sample-policy"],
+    "expected_pages": [1]
+    },
+    {
+    "scenario_id": "DIRECT-008",
+    "category": "direct_retrieval",
+    "question": "What operational practices must all production AI systems maintain?",
+    "answerable": true,
+    "expected_answer": "All production AI systems must maintain appropriate logging and monitoring.",
+    "source_document_ids": ["sample-policy"],
+    "expected_pages": [1]
+    },
     {
       "scenario_id": "UNANSWERABLE-001",
       "category": "unanswerable",
@@ -29,6 +84,24 @@
       "expected_answer": null,
       "source_document_ids": [],
       "expected_pages": []
+    },
+    {
+    "scenario_id": "UNANSWERABLE-002",
+    "category": "unanswerable",
+    "question": "Which cloud provider is mandated for production AI systems?",
+    "answerable": false,
+    "expected_answer": null,
+    "source_document_ids": [],
+    "expected_pages": []
+    },
+    {
+    "scenario_id": "UNANSWERABLE-003",
+    "category": "unanswerable",
+    "question": "What disciplinary action applies if an employee enters confidential customer information into a public AI service?",
+    "answerable": false,
+    "expected_answer": null,
+    "source_document_ids": [],
+    "expected_pages": []
     }
   ]
 }

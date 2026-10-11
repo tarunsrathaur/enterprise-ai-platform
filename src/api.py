@@ -8,6 +8,7 @@ from src.evidence import EvidenceSelector
 from src.generation import AnswerGenerator
 from src.observability import RequestMetrics
 from src.retrieval import RetrievalPipeline
+from src.evaluation_checks import is_abstention
 
 
 logging.basicConfig(
@@ -29,6 +30,7 @@ class AskRequest(BaseModel):
 
 
 class SourceResponse(BaseModel):
+    source: str
     page: int
     score: float
     chunk_id: str
@@ -136,7 +138,10 @@ def ask(request: AskRequest) -> AskResponse:
         }
     )
 
-    metrics.abstained = len(generated.sources) == 0
+    metrics.abstained = (
+        len(generated.sources) == 0
+        or is_abstention(generated.answer)
+    )
 
     metrics.total_latency_ms = metrics.elapsed_ms(
         total_start
@@ -146,6 +151,7 @@ def ask(request: AskRequest) -> AskResponse:
 
     sources = [
         SourceResponse(
+            source=result.chunk.source.replace("\\", "/").rsplit("/", 1)[-1],
             page=result.chunk.page_number,
             score=result.score,
             chunk_id=result.chunk.chunk_id,

@@ -40,7 +40,7 @@ def test_generated_answer_preserves_source_pages(monkeypatch):
         def __getitem__(self, key):
             if key == "message":
                 return {
-                    "content": "The answer is available in the document."
+                    "content": "The answer is available in the document. [SOURCE 1] [SOURCE 2]"
                 }
             raise KeyError(key)
 
@@ -70,7 +70,10 @@ def test_citations_identify_source_document_and_page(monkeypatch):
         def __getitem__(self, key):
             if key == "message":
                 return {
-                    "content": "Gradient descent updates model parameters."
+                    "content": (
+                        "Gradient descent updates model parameters. "
+                        "[SOURCE 1] [SOURCE 2]"
+                    )
                 }
             raise KeyError(key)
 
@@ -94,3 +97,104 @@ def test_citations_identify_source_document_and_page(monkeypatch):
 
     assert "[ML Study Guide.pdf, Page 3]" in result.answer
     assert "[ML Cheat Sheet.pdf, Page 3]" in result.answer
+
+
+def test_explicit_abstention_returns_no_sources_or_citations(monkeypatch):
+    class FakeResponse:
+        def __getitem__(self, key):
+            if key == "message":
+                return {
+                    "content": (
+                        "The disciplinary action is not explicitly stated "
+                        "in the provided document."
+                    )
+                }
+            raise KeyError(key)
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: FakeResponse(),
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query=(
+            "What disciplinary action applies if confidential information "
+            "is entered into a public AI service?"
+        ),
+        results=[make_result(1)],
+    )
+
+    assert result.answer == (
+        "I could not find enough information in the provided documents."
+    )
+    assert result.sources == []
+
+
+def test_unrelated_answer_is_not_treated_as_abstention(monkeypatch):
+    class FakeResponse:
+        def __getitem__(self, key):
+            if key == "message":
+                return {
+                    "content": (
+                        "All production AI systems must maintain logging "
+                        "and monitoring. [SOURCE 1]"
+                    )
+                }
+            raise KeyError(key)
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: FakeResponse(),
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query="Which cloud provider is mandated?",
+        results=[make_result(1)],
+    )
+
+    assert "logging and monitoring" in result.answer
+    assert "[test.pdf, Page 1]" in result.answer
+    assert len(result.sources) == 1
+
+def test_generated_answer_cites_only_model_identified_supporting_source(
+    monkeypatch,
+):
+    class FakeResponse:
+        def __getitem__(self, key):
+            if key == "message":
+                return {
+                    "content": (
+                        "The answer is stated in the first document. "
+                        "[SOURCE 1]"
+                    )
+                }
+            raise KeyError(key)
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: FakeResponse(),
+    )
+
+    generator = AnswerGenerator()
+
+    supporting_result = make_result(5)
+    supporting_result.chunk.text = (
+        "MS Teams is not an approved platform for academic queries."
+    )
+
+    unrelated_result = make_result(4)
+    unrelated_result.chunk.text = (
+        "The examination marking scheme is available on the LMS."
+    )
+
+    result = generator.generate(
+        query="Is MS Teams approved for academic queries?",
+        results=[supporting_result, unrelated_result],
+    )
+
+    assert "[test.pdf, Page 5]" in result.answer
+    assert "[test.pdf, Page 4]" not in result.answer
+    assert len(result.sources) == 1
+    assert result.sources[0].chunk.page_number == 5
