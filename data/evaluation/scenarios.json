@@ -102,6 +102,60 @@
     "expected_answer": null,
     "source_document_ids": [],
     "expected_pages": []
+    },
+    {
+      "scenario_id": "PARA-001",
+      "category": "paraphrase",
+      "question": "Can I use Teams to ask my faculty learner academic doubts?",
+      "answerable": true,
+      "expected_answer": "MS Teams is not an approved platform for academic queries or course-related communication.",
+      "source_document_ids": ["FAQ"],
+      "expected_pages": [5]
+    },
+    {
+      "scenario_id": "PARA-002",
+      "category": "paraphrase",
+      "question": "I missed something in class. What are the available ways to get my doubts cleared?",
+      "answerable": true,
+      "expected_answer": "Students can use the discussion forum, email the LF, or ask during a live class.",
+      "source_document_ids": ["FAQ"],
+      "expected_pages": [4]
+    },
+    {
+      "scenario_id": "PARA-003",
+      "category": "paraphrase",
+      "question": "When should I expect the course slides to be available before a lecture?",
+      "answerable": true,
+      "expected_answer": "Lecture slides are uploaded to the course page on the LMS at least five days before the scheduled lecture.",
+      "source_document_ids": ["FAQ"],
+      "expected_pages": [1]
+    },
+    {
+      "scenario_id": "PARA-004",
+      "category": "paraphrase",
+      "question": "Can customer information be pasted into a public generative AI chatbot for analysis?",
+      "answerable": true,
+      "expected_answer": "Confidential customer information must not be entered into public AI services.",
+      "source_document_ids": ["sample-policy"],
+      "expected_pages": [1]
+    },
+    {
+      "scenario_id": "HARD-UNANSWERABLE-001",
+      "category": "unanswerable",
+      "question": "Which specific Azure or AWS services have been approved for production AI workloads?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document_ids": [],
+      "expected_pages": []
+    },
+    {
+      "scenario_id": "HARD-UNANSWERABLE-002",
+      "category": "unanswerable",
+      "question": "How many hours must an authorized employee spend reviewing each customer-facing AI output?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document_ids": [],
+      "expected_pages": []
     }
   ]
 }

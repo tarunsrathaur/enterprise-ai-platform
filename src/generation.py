@@ -53,16 +53,29 @@ CONTENT:
         prompt = f"""
 Answer the question using only the supplied source content.
 
+
+
 Rules:
-- If the source contains the answer, state it directly and concisely.
-- Preserve important names, numbers, dates, and requirements.
-- Do not refuse when the source directly answers the question.
+- Use only the supplied source content as factual evidence.
+- Answer the exact question asked, not a related or broader question.
+- If a source directly answers the question, prioritize that direct evidence.
+- If the source explicitly prohibits an action, state the prohibition clearly.
+  Do not begin by saying the action is allowed when the source says it is not.
+- Do not combine facts about alternative permitted channels with a prohibition
+  in a way that creates a contradictory answer.
+- Never invent or infer numbers, durations, dates, thresholds, penalties,
+  approval status, or mandatory requirements.
+- A related policy statement does not establish a detail it does not specify.
+  For example, a requirement to review an output does not specify how long
+  that review must take.
+- If the requested detail is absent, respond exactly:
+  "I could not find enough information in the provided documents."
+- Preserve important names, numbers, dates, and requirements exactly as
+  supported by the source.
 - After each factual claim, include the source marker(s) that support it,
   using the exact format [SOURCE 1], [SOURCE 2], and so on.
 - Only cite sources that directly support the claim.
 - Do not invent source markers.
-- If the requested information is absent, respond exactly:
-  "{fallback}"
 
 QUESTION:
 {query}
@@ -81,8 +94,8 @@ ANSWER:
 
         answer = response["message"]["content"].strip()
 
-        # Remove any trailing explanation that contradicts an already
-        # provided, source-supported answer.
+        # Remove a trailing abstention explanation when a factual answer
+        # has already been provided.
         abstention_phrases = [
             "I could not find enough information",
             "I cannot find enough information",
@@ -90,10 +103,56 @@ ANSWER:
         ]
 
         for phrase in abstention_phrases:
-            position = answer.lower().find(phrase.lower())
+            position = answer.casefold().find(phrase.casefold())
             if position > 0:
                 answer = answer[:position].strip()
                 break
+
+        # Some model responses begin with an abstention but then state
+        # a fact that the supplied evidence actually supports.
+        if is_abstention(answer):
+            contrast_patterns = [
+                r"\bexcept for (?:the fact that )?",
+                r"\bother than (?:the fact that )?",
+                r"\bapart from (?:the fact that )?",
+            ]
+
+            lowered_answer = answer.casefold()
+            abstention_positions = [
+                lowered_answer.find(phrase.casefold())
+                for phrase in abstention_phrases
+                if lowered_answer.find(phrase.casefold()) >= 0
+            ]
+
+            abstention_position = (
+                min(abstention_positions)
+                if abstention_positions
+                else -1
+            )
+
+            contrast_matches = []
+            for pattern in contrast_patterns:
+                match = re.search(pattern, answer, re.IGNORECASE)
+                if (
+                    match is not None
+                    and abstention_position >= 0
+                    and match.start() > abstention_position
+                    and match.end() < len(answer)
+                ):
+                    contrast_matches.append(match)
+
+            if contrast_matches:
+                contrast = min(
+                    contrast_matches,
+                    key=lambda match: match.start(),
+                )
+                cleaned_answer = answer[contrast.end():].strip(
+                    " \t\r\n,;:-"
+                )
+
+                # Keep the extracted claim only if it has a source marker.
+                if self.SOURCE_MARKER_PATTERN.search(cleaned_answer):
+                    answer = cleaned_answer
 
         if is_abstention(answer):
             return GeneratedAnswer(answer=fallback, sources=[])

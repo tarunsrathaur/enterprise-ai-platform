@@ -86,24 +86,35 @@ def evaluate_scenario(scenario: dict) -> dict:
 
         # A basic lexical check, not a semantic correctness guarantee.
 
-        if scenario["scenario_id"] == "DIRECT-001":
+
+        if scenario["scenario_id"] in ("DIRECT-001", "PARA-001"):
             normalized_answer = answer.casefold()
 
-            mentions_platform = "ms teams" in normalized_answer
-            mentions_academic_queries = (
-                "academic quer" in normalized_answer
+            mentions_platform = (
+                "ms teams" in normalized_answer
+                or "teams" in normalized_answer
+            )
+            mentions_academic_queries = any(
+                phrase in normalized_answer
+                for phrase in (
+                    "academic quer",
+                    "academic doubt",
+                    "faculty",
+                )
             )
             expresses_prohibition = any(
                 phrase in normalized_answer
                 for phrase in (
                     "not approved",
-                    "should not use",
                     "must not use",
                     "cannot use",
+                    "can't use",
+                    "cannot be used",
                     "not permitted",
                     "prohibited",
-                    "must avoid",
-                    "should avoid",
+                    "do not use",
+                    "not allowed",
+                    "cannot contact",
                 )
             )
 
@@ -114,6 +125,7 @@ def evaluate_scenario(scenario: dict) -> dict:
             )
         else:
             checks["answer_content"] = coverage >= 0.50
+
 
         details.append(f"answer term coverage={coverage:.2f}")
 

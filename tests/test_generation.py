@@ -198,3 +198,114 @@ def test_generated_answer_cites_only_model_identified_supporting_source(
     assert "[test.pdf, Page 4]" not in result.answer
     assert len(result.sources) == 1
     assert result.sources[0].chunk.page_number == 5
+
+
+def test_supported_answer_is_preserved_after_except_for_abstention(
+    monkeypatch,
+):
+    response_text = (
+        "I could not find enough information in the provided documents "
+        "to determine the answer, except for the fact that there are "
+        "two quizzes and two assignments [SOURCE 1]."
+    )
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: {
+            "message": {"content": response_text}
+        },
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query="How many quizzes and assignments are conducted?",
+        results=[make_result(2)],
+    )
+
+    assert "two quizzes and two assignments" in result.answer
+    assert "could not find enough information" not in result.answer.lower()
+    assert "[test.pdf, Page 2]" in result.answer
+    assert len(result.sources) == 1
+
+
+def test_supported_answer_is_preserved_after_other_than_abstention(
+    monkeypatch,
+):
+    response_text = (
+        "I could not find enough information in the provided documents "
+        "regarding the slide timing, other than that slides are uploaded "
+        "at least five days prior to the lecture [SOURCE 1]."
+    )
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: {
+            "message": {"content": response_text}
+        },
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query="When are slides uploaded before a lecture?",
+        results=[make_result(1)],
+    )
+
+    assert "at least five days prior" in result.answer
+    assert "could not find enough information" not in result.answer.lower()
+    assert "[test.pdf, Page 1]" in result.answer
+    assert len(result.sources) == 1
+
+
+def test_pure_abstention_returns_fallback_without_sources(
+    monkeypatch,
+):
+    response_text = (
+        "I could not find enough information in the provided documents."
+    )
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: {
+            "message": {"content": response_text}
+        },
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query="What is not documented?",
+        results=[make_result(1)],
+    )
+
+    assert (
+        result.answer
+        == "I could not find enough information in the provided documents."
+    )
+    assert result.sources == []
+
+
+def test_mixed_abstention_without_source_marker_returns_fallback(
+    monkeypatch,
+):
+    response_text = (
+        "I could not find enough information in the provided documents, "
+        "except for the fact that there are two quizzes and two assignments."
+    )
+
+    monkeypatch.setattr(
+        "src.generation.ollama.chat",
+        lambda **kwargs: {
+            "message": {"content": response_text}
+        },
+    )
+
+    generator = AnswerGenerator()
+    result = generator.generate(
+        query="How many quizzes and assignments are conducted?",
+        results=[make_result(2)],
+    )
+
+    assert (
+        result.answer
+        == "I could not find enough information in the provided documents."
+    )
+    assert result.sources == []
